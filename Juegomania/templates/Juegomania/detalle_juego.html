@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Juego - Juego Manía</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'catalogo' %}"><i class="fa-solid fa-dice"></i> Juego Manía</a>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="mb-4">
+            <a href="{% url 'catalogo' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fa-solid fa-arrow-left me-1"></i> Volver al Catálogo
+            </a>
+        </div>
+
+        <div class="row bg-white p-4 p-md-5 rounded-4 shadow-sm align-items-center">
+            <div class="col-md-5 mb-4 mb-md-0 text-center">
+                {% if juego.imagen %}
+                    <img src="{{ juego.imagen.url }}" class="img-fluid rounded-4 shadow" alt="{{ juego.nombre }}" style="max-height: 350px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-4 shadow" style="height: 300px;">
+                        <i class="fa-solid fa-image fa-3x"></i>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-7 ps-md-4">
+                <h2 class="fw-bold text-dark mb-3">{{ juego.nombre }}</h2>
+                <h3 class="text-primary fw-bold mb-3">${{ juego.precio }} CLP</h3>
+                <p class="text-muted mb-4"><i class="fa-solid fa-tag me-1"></i> Categoría: <strong>{{ juego.categoria.nombre }}</strong></p>
+                
+                <div class="alert alert-secondary py-2 px-3 d-inline-block rounded-pill mb-4">
+                    <i class="fa-solid fa-box-archive me-1"></i> Stock disponible: <strong>{{ juego.stock }} unidades</strong>
+                </div>
+
+                <hr class="mb-4">
+
+                <h4 class="mb-3 fw-bold">Formulario de Pedido</h4>
+                
+                {% if error_mensaje %}
+                    <div class="alert alert-danger rounded-3">{{ error_mensaje }}</div>
+                {% endif %}
+
+                <form method="POST" class="needs-validation">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre del Cliente</label>
+                        <input type="text" name="nombre" class="form-control rounded-3" required placeholder="Ej. Juan Pérez">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Correo Electrónico</label>
+                        <input type="email" name="correo" class="form-control rounded-3" required placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Teléfono</label>
+                        <input type="text" name="telefono" class="form-control rounded-3" required placeholder="+569...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Cantidad (Máximo 5)</label>
+                        <input type="number" name="cantidad" class="form-control rounded-3" min="1" max="5" value="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-2 rounded-pill fw-bold shadow-sm">
+                        <i class="fa-solid fa-check me-1"></i> Confirmar Pedido
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

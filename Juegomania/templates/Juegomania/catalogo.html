@@ -1,76 +1,83 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego Manía - Catálogo Oficial</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-light">
+{% extends 'Juegomania/base.html' %}
 
-    <!-- Navbar Superior -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'catalogo' %}"><i class="fa-solid fa-dice"></i> Juego Manía</a>
-            <div class="ms-auto">
-                <a href="/admin/" target="_blank" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-gear"></i> Panel Admin</a>
-            </div>
-        </div>
-    </nav>
+{% block title %}Inicio - Juego Manía{% endblock %}
 
-    <!-- Contenido Principal -->
-    <div class="container my-5">
-        <div class="row mb-5 text-center">
-            <div class="col-md-12">
-                <h1 class="fw-bold text-dark">Catálogo de Juegos de Mesa</h1>
-                <p class="text-muted">Explora nuestra colección y asegura tu copia al instante.</p>
-            </div>
-        </div>
-
-        <!-- Listado de Juegos -->
-        <div class="row">
-            {% for juego in juegos %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow border-0 rounded-4 overflow-hidden">
-                        {% if juego.imagen %}
-                            <img src="{{ juego.imagen.url }}" class="card-img-top" alt="{{ juego.nombre }}" style="height: 220px; object-fit: cover;">
-                        {% else %}
-                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 220px;">
-                                <i class="fa-solid fa-image fa-3x"></i>
-                            </div>
-                        {% endif %}
-                        <div class="card-body d-flex flex-column p-4">
-                            <h4 class="card-title fw-bold text-dark mb-2">{{ juego.nombre }}</h4>
-                            <p class="text-primary fw-semibold mb-3">${{ juego.precio }} CLP</p>
-                            <p class="card-text text-muted small mb-4">
-                                <i class="fa-solid fa-boxes-stacked me-1"></i> Stock disponible: <strong>{{ juego.stock }} unidades</strong>
-                            </p>
-                            <div class="mt-auto">
-                                <a href="{% url 'detalle_juego' juego.id %}" class="btn btn-dark w-100 py-2 rounded-pill fw-semibold">
-                                    Ver Detalle <i class="fa-solid fa-arrow-right ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-12">
+        <h2 class="fw-bold text-dark mb-3"><i class="fa-solid fa-gamepad text-primary me-2"></i>Catálogo de Juegos</h2>
+        
+        <!-- Buscador y Selector de Categorías -->
+        <form method="GET" action="{% url 'catalogo' %}" class="card p-3 shadow-sm border-0 rounded-4 bg-white">
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="Buscar juego por nombre..." value="{{ q }}">
                     </div>
                 </div>
-            {% empty %}
-                <div class="col-12 text-center py-5">
-                    <div class="alert alert-warning py-4 shadow-sm rounded-4 d-inline-block px-5">
-                        <i class="fa-solid fa-triangle-exclamation fa-2x mb-3 text-warning"></i>
-                        <h4>No hay juegos registrados</h4>
-                        <p class="mb-0">Agrega tu primer juego desde el panel de administración.</p>
-                    </div>
+                <div class="col-md-4">
+                    <select name="categoria" class="form-select">
+                        <option value="">Todas las categorías</option>
+                        {% for cat in categorias %}
+                            <option value="{{ cat.id }}" {% if cat_id == cat.id|stringformat:"s" %}selected{% endif %}>
+                                {{ cat.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
-            {% endfor %}
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">Filtrar</button>
+                    {% if q or cat_id %}
+                        <a href="{% url 'catalogo' %}" class="btn btn-outline-secondary" title="Limpiar filtros"><i class="fa-solid fa-xmark"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Grilla de Juegos (Muestra Imagen, Nombre, Categoría y Precio en CLP) -->
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for juego in juegos %}
+    <div class="col">
+        <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+            <div class="position-relative">
+                {% if juego.imagen %}
+                    <img src="{{ juego.imagen.url }}" class="card-img-top" alt="{{ juego.nombre }}" style="height: 230px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 230px;">
+                        <i class="fa-solid fa-image fa-3x"></i>
+                    </div>
+                {% endif %}
+
+                {% if juego.stock == 0 %}
+                    <span class="position-absolute top-0 end-0 badge bg-danger m-2 fs-6 px-3 py-2 shadow">Agotado</span>
+                {% endif %}
+            </div>
+
+            <div class="card-body d-flex flex-column">
+                <span class="badge bg-light text-dark border align-self-start mb-2">
+                    <i class="fa-solid fa-tag text-primary me-1"></i>{{ juego.categoria.nombre }}
+                </span>
+                
+                <!-- Nombre del juego -->
+                <h5 class="card-title fw-bold text-dark mb-1">{{ juego.nombre }}</h5>
+                
+                <!-- Precio visible en el inicio -->
+                <p class="text-primary fw-bold fs-4 mb-3">{{ juego.precio_clp }}</p>
+                
+                <a href="{% url 'detalle_juego' juego.id %}" class="btn {% if juego.stock == 0 %}btn-outline-secondary{% else %}btn-dark{% endif %} w-100 rounded-pill fw-semibold mt-auto">
+                    Ver Detalle
+                </a>
+            </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-4 mt-5">
-        <p class="mb-0 text-white-50">&copy; 2026 Juego Manía - INACAP</p>
-    </footer>
-
-</body>
-</html>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No hay juegos disponibles que coincidan con la búsqueda.</h5>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
